@@ -8,6 +8,7 @@ from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
 from aiogram.dispatcher.filters.state import State, StatesGroup
 
+from graph_utils import Last_Month
 
 # Configure logging
 logging.basicConfig(
@@ -70,8 +71,12 @@ async def process_add_country(message: types.Message, state: FSMContext):
     """
     async with state.proxy() as state_data:
         state_data['country'] = message.text
-    await message.answer(
-        f"Отлично\n{state_data['stock']}\n{state_data['country']}")
+    path = Last_Month(state_data['stock'], state_data['country'])
+    with open(path, 'rb') as photo:
+        await bot.send_photo(
+            chat_id=message.from_user.id,
+            photo=photo,
+            caption=f"{state_data['stock']}\n{state_data['country']}")
     await state.finish()
 
 

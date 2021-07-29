@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 from datetime import datetime
 import matplotlib.pyplot as plt
-from datetime import date
+from datetime import date, timedelta
 import datetime as dt
 plt.style.use('fivethirtyeight')  # специальное отображение графиков для pyplot
 
@@ -17,7 +17,7 @@ def Stock_SMA(stock,country):
     try:
         df = investpy.get_stock_historical_data(stock = stock,country = country,from_date='01/01/2019',to_date=current_date)
     except:
-        df = yf.download(stock,start ='2019-01-01',end = date.today(),progress=False)
+        df = yf.download(stock, start='2019-01-01', end = date.today(), progress=False)
     #Count SMA30 / SMA90
     SMA30 = pd.DataFrame()
     SMA30['Close Price'] = df['Close'].rolling(window = 30).mean()
@@ -176,17 +176,31 @@ def Low_levels(stock,country):
 
 def Last_Month(stock,country):
     current_date = str(date.today().day) + '/'+ str(date.today().month) +'/' + str(date.today().year)
+    prev = date.today().replace(day=1) - timedelta(days=1)
+    prev_month = prev.strftime('%d/%m/%Y')
+    prev_month_2 = prev.strftime('%Y-%m-%d')
     try:
-        df = investpy.get_stock_historical_data(stock = stock,country = country,from_date='01/01/2019',to_date=current_date)
+        df = investpy.get_stock_historical_data(
+            stock=stock,
+            country=country,
+            from_date=prev_month,
+            to_date=current_date)
     except:
-        df = yf.download(stock,start ='2019-01-01',end = date.today(),progress=False)
+        df = yf.download(
+            stock,
+            start=prev_month_2,
+            end=date.today(),
+            progress=False)
     plt.figure(figsize = (12.6,4.6))
     plt.plot(df['Close'][-30:], label = stock ,alpha = 0.35)
     plt.title(stock + ' history last 30 days')
     plt.xlabel('Last 30 days')
     plt.ylabel('Close price')
     plt.legend(loc = 'upper left')
-    plt.show()
+    current_date = current_date.replace('/', '-')
+    path = f'src/data_of_figure/{current_date}_last_month_of_{stock}.png'
+    plt.savefig(path, bbox_inches='tight')
+    return path
     print('Prices Last Five days of '+stock+' =',np.array(df['Close'][-5:][0]),';',np.array(df['Close'][-5:][1]),
          ';',np.array(df['Close'][-5:][2]),';',np.array(df['Close'][-5:][3]),';',np.array(df['Close'][-5:][4]))
     p_1 = abs(1-df['Close'][-5:][1]/df['Close'][-5:][0])
@@ -210,13 +224,3 @@ def Last_Month(stock,country):
     else:
         pp_4 = '-'+str(round(p_4*100,2))+'%'
     print('Percentage +/- of '+stock+' =',pp_1,';',pp_2,';',pp_3,';',pp_4,)
-
-
-stock = 'AAPL'
-country = 'United States'
-
-Stock_SMA(stock, country)
-Stock_EMA(stock, country)
-Upper_levels(stock, country)
-Low_levels(stock, country)
-Last_Month(stock, country)
