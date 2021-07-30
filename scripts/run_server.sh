@@ -12,12 +12,13 @@ fi
 
 $VENV/bin/pip install -U pip
 echo "$?"
-
 $VENV/bin/pip install -r requirements.txt
 echo "$?"
+$VENV/bin/python src/manage.py migrate
+$VENV/bin/python src/manage.py collectstatic --no-input
 
-$VENV/bin/python src/bot.py
+$VENV/bin/python src/manage.py runserver 0.0.0.0:8000
 
 rm -f $DEPLOY_FLAG
 
-echo "Run Bot"
+echo "Run Django"
