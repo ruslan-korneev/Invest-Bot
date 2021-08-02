@@ -1,24 +1,38 @@
 version: '2.1'
 
 services:
-    app:
-        tty: true
-        image: python:3.9
-        depends_on:
-            - db
-        env_file: .env
-        volumes:
-            - .:/opt/invest_bot
-        container_name: invest_bot
-        working_dir: /opt/invest_bot
-        command: /bin/bash -c 'scripts/run_bot.sh'
 
-    db:
-        image: postgres:12.0-alpine
-        volumes:
-            - ./postgres_data:/var/lib/postgresql/data
-        container_name: invest_db
-        env_file: .env
+  web:
+    tty: true
+    image: python:3.9
+    depends_on:
+      - db
+    volumes:
+      - .:/opt/invest
+    container_name: invest-web
+    ports:
+      - "0.0.0.0:8080:8000"
+    env_file: .env
+    working_dir: /opt/invest
+    command: /bin/bash -c 'scripts/run_server.sh'
+  bot:
+    tty: true
+    image: python:3.9
+    depends_on:
+      - web
+      - db
+    env_file: .env
+    volumes:
+      - .:/opt/invest
+    container_name: invest-bot
+    working_dir: /opt/invest
+    command: /bin/bash -c 'scripts/run_bot.sh'
+  db:
+    image: postgres:12.0-alpine
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+    container_name: invest-db
+    env_file: .env
 
 volumes:
     postgres_data:

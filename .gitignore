@@ -1,9 +1,11 @@
 venv
 .env
 
+.DS_Store
 __pycache__
 
 postgres_data
+static
 
 *.png
 *.log
